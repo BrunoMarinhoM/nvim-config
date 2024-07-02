@@ -2,4 +2,15 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
-return {}
+return {
+  require('flutter-tools').setup {
+    lsp = {
+      settings = {
+        analysisExcludedFolders = {
+          vim.fn.expand '$HOME/Downloads/everything_14_02_2024/flutter/packages',
+          vim.fn.expand '$HOME/Downloads/everything_14_02_2024/flutter/.pubcache',
+        },
+      },
+    },
+  }, --defaults
+}

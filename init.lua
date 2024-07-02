@@ -3,9 +3,10 @@
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
+-- Enable true color
+vim.opt.termguicolors = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -28,7 +29,6 @@ vim.opt.showmode = false
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 vim.opt.clipboard = 'unnamedplus'
-
 -- Enable break indent
 vim.opt.breakindent = true
 
@@ -43,11 +43,11 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = 'yes'
 
 -- Decrease update time
-vim.opt.updatetime = 150
+vim.opt.updatetime = 50
 
 -- Decrease mapped sequence wait time
 -- Displays which-key popup sooner
-vim.opt.timeoutlen = 300
+-- vim.opt.timeoutlen = 300
 
 -- Configure how new splits should be opened
 vim.opt.splitright = true
@@ -60,10 +60,10 @@ vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
-vim.opt.inccommand = 'split'
+-- vim.opt.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.opt.cursorline = true
+vim.opt.cursorline = false
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 8
@@ -81,6 +81,9 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagn
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+--Color picker keymaps
+vim.keymap.set('n', '<leader>p', '<cmd>CccPick<CR>')
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -88,6 +91,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+vim.keymap.set('n', '<Esc><Esc>', '<Esc>0')
 
 -- TIP: Disable arrow keys in normal mode
 vim.keymap.set('n', '<left>', '<cmd>echo "Move Propertly"<CR>')
@@ -95,31 +99,41 @@ vim.keymap.set('n', '<right>', '<cmd>echo "Move Propertly"<CR>')
 vim.keymap.set('n', '<up>', '<cmd>echo "Move Propertly"<CR>')
 vim.keymap.set('n', '<down>', '<cmd>echo "Move Propertly"<CR>')
 
-local function scroll()
-  local line = vim.fn.line
-  local nvim_input = vim.api.nvim_input
-  -- what count was given with j? defaults to 1 (e.g. 10j to move 10 lines
-  -- down, j the same as 1j)
-  local count1 = vim.v.count1
-  -- how far from the end of the file is the current cursor position?
-  local distance = line '$' - line '.'
-  if line '$' <= 30 or distance > 8 then
-    nvim_input '+1'
-  elseif distance <= 8 then
-    nvim_input(count1 .. '<C-e>')
-    nvim_input '+1'
-  end
+-- local function scrollDown()
+--   local line = vim.fn.line
+--   local nvim_input = vim.api.nvim_input
+--   local count1 = vim.v.count1
+--   local distance = line '$' - line '.'
+--   if line '$' <= 30 or distance > 8 then
+--     nvim_input '+1'
+--   end
+--   if distance <= 8 and distance > 0 then
+--     nvim_input(count1 .. '<C-e>')
+--     nvim_input '+1'
+--   end
+-- end
+--
+-- vim.keymap.set('n', 'j', scrollDown, {
+--   desc = 'continue scrolling past end of file with j',
+-- })
+
+local function commentVisual()
+  vim.api.nvim_input 'gc'
 end
 
-vim.keymap.set('n', 'j', scroll, {
-  desc = 'continue scrolling past end of file with j',
-})
+local function comment()
+  vim.api.nvim_input 'gcc'
+end
+
+vim.keymap.set('n', '<leader>/', comment)
+vim.keymap.set('v', '<leader>/', commentVisual)
 
 local function new_G()
   local line = vim.fn.line
-  local distance = line '$' - line '.'
-  vim.cmd.execute('+' .. distance + 1)
-  vim.api.nvim_input '8<C-e>'
+  if line '$' - line '.' > 23 then
+    vim.api.nvim_input '8<C-e>'
+  end
+  vim.cmd('+' .. (line '$' - line '.'))
 end
 
 vim.keymap.set('n', 'G', new_G)
@@ -131,9 +145,6 @@ end
 local function lineupten()
   -- vim.cmd.execute("-15")
 end
-
-vim.keymap.set('n', '1', linedownten)
-vim.keymap.set('n', '!', lineupten)
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -178,7 +189,7 @@ vim.opt.rtp:prepend(lazypath)
 --    :Lazy update
 --
 -- NOTE: Here is where you install your plugins.
-require('lazy').setup({
+require('lazy').setup {
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
@@ -193,7 +204,6 @@ require('lazy').setup({
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
-
   -- flutter tools
   {
     'akinsho/flutter-tools.nvim',
@@ -217,7 +227,7 @@ require('lazy').setup({
         change = { text = '~' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
-        changedelete = { text = '~' },
+        changedelete = { text = '@' },
       },
     },
   },
@@ -293,7 +303,7 @@ require('lazy').setup({
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
-      -- it can fuzzy find! It's more than just a "file finder", it can search
+      -- it can fuzzy find! It's more than just a "", it can search
       -- many different aspects of Neovim, your workspace, LSP, and more!
       --
       -- The easiest way to use Telescope, is to start by doing something like:
@@ -348,7 +358,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader>/', function()
+      vim.keymap.set('n', '/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
@@ -567,7 +577,7 @@ require('lazy').setup({
       --
       --  You can press `g?` for help in this menu.
       require('mason').setup()
-
+      require('lspconfig').phpactor.setup {} -- false
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -610,9 +620,10 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+
+        local disable_filetypes = { c = true, cpp = true, html = true, svelte = true }
         return {
-          timeout_ms = 500,
+          -- timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
         }
       end,
@@ -623,7 +634,8 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { { 'prettier' } },
+        svelte = { { 'prettier' } },
       },
     },
   },
@@ -739,6 +751,54 @@ require('lazy').setup({
     end,
   },
 
+  -- {
+  --   'NvChad/nvim-colorizer.lua',
+  --
+  --   opts = {
+  --     filetypes = { '*' },
+  --     user_default_options = {
+  --       RGB = true, -- #RGB hex codes
+  --       RRGGBB = true, -- #RRGGBB hex codes
+  --       names = true, -- "Name" codes like Blue or blue
+  --       RRGGBBAA = true, -- #RRGGBBAA hex codes
+  --       AARRGGBB = true, -- 0xffffffff hex codes
+  --       rgb_fn = true, -- CSS rgb() and rgba() functions
+  --       hsl_fn = true, -- CSS hsl() and hsla() functions
+  --       css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+  --       css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+  --       -- Available modes for `mode`: foreground, background,  virtualtext
+  --       mode = 'background', -- Set the display mode.
+  --       -- Available methods are false / true / "normal" / "lsp" / "both"
+  --       -- True is same as normal
+  --       tailwind = true, -- Enable tailwind colors
+  --       -- parsers can contain values used in |user_default_options|
+  --       sass = { enable = false, parsers = { 'css' } }, -- Enable sass colors
+  --       virtualtext = '■',
+  --       -- update color values even if buffer is not focused
+  --       -- example use: cmp_menu, cmp_docs
+  --       always_update = false,
+  --     },
+  --     -- all the sub-options of filetypes apply to buftypes
+  --     buftypes = {},
+  --   },
+  -- },
+
+  {
+    'uga-rosa/ccc.nvim',
+    config = function()
+      local ccc = require 'ccc'
+      ccc.setup {
+        -- Your preferred settings
+        -- Example: enable highlighter
+        highlighter = {
+          auto_enable = true,
+          lsp = false,
+        },
+        disable_default_mappings = true,
+      }
+    end,
+  },
+
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
@@ -777,12 +837,11 @@ require('lazy').setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
-
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
+      -- -- set use_icons to true if you have a Nerd Font
       statusline.setup { use_icons = vim.g.have_nerd_font }
 
       -- You can configure sections in the statusline by overriding their
@@ -800,6 +859,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
+    commit = '',
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
@@ -811,7 +871,7 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'dart' } },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -852,7 +912,7 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   -- { import = 'custom.plugins' },
-}, {
+  {},
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
@@ -872,7 +932,7 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
-})
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
