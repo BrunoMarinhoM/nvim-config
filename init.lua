@@ -7,7 +7,7 @@ vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = false
 -- Enable true color
 vim.opt.termguicolors = true
-
+vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = 'none' })
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -751,53 +751,39 @@ require('lazy').setup {
     end,
   },
 
-  -- {
-  --   'NvChad/nvim-colorizer.lua',
-  --
-  --   opts = {
-  --     filetypes = { '*' },
-  --     user_default_options = {
-  --       RGB = true, -- #RGB hex codes
-  --       RRGGBB = true, -- #RRGGBB hex codes
-  --       names = true, -- "Name" codes like Blue or blue
-  --       RRGGBBAA = true, -- #RRGGBBAA hex codes
-  --       AARRGGBB = true, -- 0xffffffff hex codes
-  --       rgb_fn = true, -- CSS rgb() and rgba() functions
-  --       hsl_fn = true, -- CSS hsl() and hsla() functions
-  --       css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-  --       css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
-  --       -- Available modes for `mode`: foreground, background,  virtualtext
-  --       mode = 'background', -- Set the display mode.
-  --       -- Available methods are false / true / "normal" / "lsp" / "both"
-  --       -- True is same as normal
-  --       tailwind = true, -- Enable tailwind colors
-  --       -- parsers can contain values used in |user_default_options|
-  --       sass = { enable = false, parsers = { 'css' } }, -- Enable sass colors
-  --       virtualtext = '■',
-  --       -- update color values even if buffer is not focused
-  --       -- example use: cmp_menu, cmp_docs
-  --       always_update = false,
-  --     },
-  --     -- all the sub-options of filetypes apply to buftypes
-  --     buftypes = {},
-  --   },
-  -- },
-
   {
-    'uga-rosa/ccc.nvim',
-    config = function()
-      local ccc = require 'ccc'
-      ccc.setup {
-        -- Your preferred settings
-        -- Example: enable highlighter
-        highlighter = {
-          auto_enable = true,
-          lsp = false,
-        },
-        disable_default_mappings = true,
-      }
-    end,
+    'NvChad/nvim-colorizer.lua',
+
+    opts = {
+      filetypes = { '*' },
+      user_default_options = {
+        RGB = true, -- #RGB hex codes
+        RRGGBB = true, -- #RRGGBB hex codes
+        names = true, -- "Name" codes like Blue or blue
+        RRGGBBAA = true, -- #RRGGBBAA hex codes
+        AARRGGBB = true, -- 0xffffffff hex codes
+        rgb_fn = true, -- CSS rgb() and rgba() functions
+        hsl_fn = true, -- CSS hsl() and hsla() functions
+        css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+        css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+        -- Available modes for `mode`: foreground, background,  virtualtext
+        mode = 'background', -- Set the display mode.
+        -- Available methods are false / true / "normal" / "lsp" / "both"
+        -- True is same as normal
+        tailwind = true, -- Enable tailwind colors
+        -- parsers can contain values used in |user_default_options|
+        sass = { enable = false, parsers = { 'css' } }, -- Enable sass colors
+        virtualtext = '■',
+        -- update color values even if buffer is not focused
+        -- example use: cmp_menu, cmp_docs
+        always_update = false,
+      },
+      -- all the sub-options of filetypes apply to buftypes
+      buftypes = {},
+    },
   },
+
+  { 'xiyaowong/transparent.nvim', lazy = false },
 
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
@@ -805,19 +791,12 @@ require('lazy').setup {
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
 
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
-    end,
+    priority = 1000, -- Make sure to load this before all the other start plugins.
   },
 
   -- Highlight todo, notes, etc in comments
+  --
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
   { -- Collection of various small independent plugins/modules
@@ -933,6 +912,49 @@ require('lazy').setup {
     },
   },
 }
+
+require('transparent').setup { -- Optional, you don't have to run setup.
+  groups = { -- table: default groups
+    'Normal',
+    'NormalNC',
+    'Comment',
+    'Constant',
+    'Special',
+    'Identifier',
+    'Statement',
+    'PreProc',
+    'Type',
+    'Underlined',
+    'Todo',
+    'String',
+    'Function',
+    'Conditional',
+    'Repeat',
+    'Operator',
+    'Structure',
+    'LineNr',
+    'NonText',
+    'SignColumn',
+    'CursorLine',
+    'CursorLineNr',
+    'StatusLine',
+    'StatusLineNC',
+    'EndOfBuffer',
+  },
+  extra_groups = {}, -- table: additional groups that should be cleared
+  exclude_groups = {}, -- table: groups you don't want to clear
+}
+
+require('tokyonight').setup {
+  transparent = true,
+
+  on_colors = function(colors) end,
+  on_highlights = function(highlights, colors) end,
+}
+
+vim.cmd.colorscheme 'tokyonight'
+-- You can configure highlights by doing something like:
+vim.cmd.hi 'Comment gui=none'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
