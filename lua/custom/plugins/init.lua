@@ -13,4 +13,17 @@ return {
       },
     },
   }, --defaults
+
+  require('tokyonight').setup {
+    transparent = true,
+
+    on_colors = function(colors) end,
+    on_highlights = function(highlights, colors) end,
+  },
+
+  require('phpcs').setup {
+    phpcs = 'phpcs',
+    phpcbf = 'phpcbf',
+    standard = 'PSR12',
+  },
 }

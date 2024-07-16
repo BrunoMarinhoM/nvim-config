@@ -81,9 +81,6 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagn
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
---Color picker keymaps
-vim.keymap.set('n', '<leader>p', '<cmd>CccPick<CR>')
-
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -204,6 +201,20 @@ require('lazy').setup {
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
+
+  {
+    'praem90/nvim-phpcsf',
+    config = function(_)
+      local _phpcsf = require 'phpcs'
+
+      _phpcsf.setup {
+        phpcs = 'phpcs',
+        phpcbf = 'phpcbf',
+        standard = 'PSR12',
+      }
+    end,
+  },
+
   -- flutter tools
   {
     'akinsho/flutter-tools.nvim',
@@ -232,6 +243,17 @@ require('lazy').setup {
     },
   },
 
+  -- {
+  --   'f-person/git-blame.nvim',
+  --   config = function()
+  --     require('gitblame').setup {
+  --       message_template = '        #<author> -> <summary>',
+  --       delay = 250,
+  --       virtual_text_column = 55,
+  --     }
+  --   end,
+  -- },
+
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
@@ -251,22 +273,23 @@ require('lazy').setup {
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
+      local wk = require 'which-key'
+      wk.setup()
 
       -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+      wk.add {
+        { '<leader>c', group = '[C]ode' },
+        { '<leader>d', group = '[D]ocument' },
+        { '<leader>r', group = '[R]ename' },
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>w', group = '[W]orkspace' },
+        { '<leader>t', group = '[T]oggle' },
+        { '<leader>h', group = 'Git [H]unk' },
       }
       -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
+      wk.add {
+        { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
+      }
     end,
   },
 
@@ -299,7 +322,7 @@ require('lazy').setup {
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = true },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -428,6 +451,21 @@ require('lazy').setup {
       --    That is to say, every time a new file is opened that is associated with
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
       --    function will be executed to configure the current buffer
+
+      local lspconf = require 'lspconfig'
+      -- lspconf.phpactor.setup {
+      --   root_dir = function(_)
+      --     return vim.loop.cwd()
+      --   end,
+      --   init_options = {
+      --     ['language_server.diagnostics_on_update'] = false,
+      --     ['language_server.diagnostics_on_open'] = false,
+      --     ['language_server.diagnostics_on_save'] = false,
+      --     ['language_server._phpstan.enabled'] = false,
+      --     ['language_server._psalm.enabled'] = false,
+      --   },
+      -- }
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -577,7 +615,6 @@ require('lazy').setup {
       --
       --  You can press `g?` for help in this menu.
       require('mason').setup()
-      require('lspconfig').phpactor.setup {} -- false
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -943,13 +980,6 @@ require('transparent').setup { -- Optional, you don't have to run setup.
   },
   extra_groups = {}, -- table: additional groups that should be cleared
   exclude_groups = {}, -- table: groups you don't want to clear
-}
-
-require('tokyonight').setup {
-  transparent = true,
-
-  on_colors = function(colors) end,
-  on_highlights = function(highlights, colors) end,
 }
 
 vim.cmd.colorscheme 'tokyonight'
