@@ -202,6 +202,8 @@ require('lazy').setup {
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
 
+  { 'akinsho/git-conflict.nvim', version = '*', config = true },
+
   {
     'praem90/nvim-phpcsf',
     config = function(_)
@@ -452,20 +454,6 @@ require('lazy').setup {
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
       --    function will be executed to configure the current buffer
 
-      local lspconf = require 'lspconfig'
-      -- lspconf.phpactor.setup {
-      --   root_dir = function(_)
-      --     return vim.loop.cwd()
-      --   end,
-      --   init_options = {
-      --     ['language_server.diagnostics_on_update'] = false,
-      --     ['language_server.diagnostics_on_open'] = false,
-      --     ['language_server.diagnostics_on_save'] = false,
-      --     ['language_server._phpstan.enabled'] = false,
-      --     ['language_server._psalm.enabled'] = false,
-      --   },
-      -- }
-
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -658,7 +646,7 @@ require('lazy').setup {
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
 
-        local disable_filetypes = { c = true, cpp = true, html = true, svelte = true }
+        local disable_filetypes = { c = true, cpp = true, html = true, svelte = true, toml = true }
         return {
           -- timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
