@@ -1,10 +1,11 @@
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 -- Enable true color
 vim.opt.termguicolors = true
 vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = 'none' })
@@ -36,7 +37,7 @@ vim.opt.breakindent = true
 vim.opt.undofile = true
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-vim.opt.ignorecase = false
+vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
@@ -63,7 +64,7 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- vim.opt.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.opt.cursorline = false
+vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 8
@@ -113,6 +114,10 @@ vim.keymap.set('n', '<down>', '<cmd>echo "Move Propertly"<CR>')
 -- vim.keymap.set('n', 'j', scrollDown, {
 --   desc = 'continue scrolling past end of file with j',
 -- })
+vim.keymap.set('n', '<C-j>', '10j')
+vim.keymap.set('n', '<C-k>', '10k')
+vim.keymap.set('v', '<C-j>', '10j')
+vim.keymap.set('v', '<C-k>', '10k')
 
 local function commentVisual()
   vim.api.nvim_input 'gc'
@@ -201,6 +206,12 @@ require('lazy').setup {
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
+
+  {
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+  },
 
   { 'akinsho/git-conflict.nvim', version = '*', config = true },
 
@@ -646,7 +657,7 @@ require('lazy').setup {
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
 
-        local disable_filetypes = { c = true, cpp = true, html = true, svelte = true, toml = true }
+        local disable_filetypes = { zig = true, c = true, cpp = true, html = true, svelte = true, toml = true }
         return {
           -- timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
@@ -661,6 +672,7 @@ require('lazy').setup {
         -- is found.
         javascript = { { 'prettier' } },
         svelte = { { 'prettier' } },
+        yaml = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -973,6 +985,5 @@ require('transparent').setup { -- Optional, you don't have to run setup.
 vim.cmd.colorscheme 'tokyonight'
 -- You can configure highlights by doing something like:
 vim.cmd.hi 'Comment gui=none'
-
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
