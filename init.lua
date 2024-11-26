@@ -8,7 +8,6 @@ vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 -- Enable true color
 vim.opt.termguicolors = true
-vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = 'none' })
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -114,10 +113,10 @@ vim.keymap.set('n', '<down>', '<cmd>echo "Move Propertly"<CR>')
 -- vim.keymap.set('n', 'j', scrollDown, {
 --   desc = 'continue scrolling past end of file with j',
 -- })
-vim.keymap.set('n', '<C-j>', '10j')
-vim.keymap.set('n', '<C-k>', '10k')
-vim.keymap.set('v', '<C-j>', '10j')
-vim.keymap.set('v', '<C-k>', '10k')
+vim.keymap.set('n', '<C-j>', '<C-d>')
+vim.keymap.set('n', '<C-k>', '<C-u>')
+vim.keymap.set('v', '<C-j>', '<C-d>')
+vim.keymap.set('v', '<C-k>', '<C-u>')
 
 local function commentVisual()
   vim.api.nvim_input 'gc'
@@ -139,6 +138,7 @@ local function new_G()
 end
 
 vim.keymap.set('n', 'G', new_G)
+vim.keymap.set('n', '<leader>fe', '<cmd>Explore<CR>')
 
 local function linedownten()
   -- vim.cmd.execute("+15")
@@ -207,6 +207,33 @@ require('lazy').setup {
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
 
+  { 'ThePrimeagen/vim-be-good' },
+
+  {
+    {
+      'mistricky/codesnap.nvim',
+      build = 'make build_generator',
+      keys = {
+        { '<leader>cc', '<cmd>CodeSnap<CR>', mode = 'v', desc = 'Save selected code snapshot into clipboard' },
+        { '<leader>cs', '<cmd>CodeSnapSave<CR>', mode = 'v', desc = 'Save selected code snapshot in ~/Pictures' },
+      },
+      opts = {
+        save_path = '~/Pictures',
+        has_breadcrumbs = true,
+        bg_theme = 'bamboo',
+      },
+    },
+  },
+
+  {
+    'jiaoshijie/undotree',
+    dependencies = 'nvim-lua/plenary.nvim',
+    config = true,
+    keys = { -- load the plugin only when using it's keybinding:
+      { '<leader>u', "<cmd>lua require('undotree').toggle()<CR>" },
+    },
+  },
+
   {
     'ThePrimeagen/harpoon',
     branch = 'harpoon2',
@@ -254,6 +281,24 @@ require('lazy').setup {
         changedelete = { text = '@' },
       },
     },
+  },
+
+  {
+    'folke/tokyonight.nvim',
+    priority = 1000,
+    lazy = false,
+    config = function()
+      local transparent = true -- set to true if you would like to enable transparency
+
+      require('tokyonight').setup {
+        style = 'night',
+        transparent = transparent,
+        on_colors = function(colors) end,
+        on_highlights = function(highlights, colors) end,
+      }
+
+      vim.cmd 'colorscheme tokyonight'
+    end,
   },
 
   -- {
@@ -590,21 +635,6 @@ require('lazy').setup {
         -- But for many setups, the LSP (`tsserver`) will work just fine
         -- tsserver = {},
         --
-
-        lua_ls = {
-          -- cmd = {...},
-          -- filetypes = { ...},
-          -- capabilities = {},
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = 'Replace',
-              },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
-            },
-          },
-        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -666,12 +696,12 @@ require('lazy').setup {
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'black' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'prettier' } },
-        svelte = { { 'prettier' } },
+        javascript = { 'prettier' },
+        svelte = { 'prettier' },
         yaml = { { 'prettierd', 'prettier' } },
       },
     },
@@ -820,17 +850,7 @@ require('lazy').setup {
     },
   },
 
-  { 'xiyaowong/transparent.nvim', lazy = false },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-  },
+  -- { 'xiyaowong/transparent.nvim', lazy = false },
 
   -- Highlight todo, notes, etc in comments
   --
@@ -915,10 +935,10 @@ require('lazy').setup {
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -949,41 +969,17 @@ require('lazy').setup {
     },
   },
 }
-
-require('transparent').setup { -- Optional, you don't have to run setup.
-  groups = { -- table: default groups
-    'Normal',
-    'NormalNC',
-    'Comment',
-    'Constant',
-    'Special',
-    'Identifier',
-    'Statement',
-    'PreProc',
-    'Type',
-    'Underlined',
-    'Todo',
-    'String',
-    'Function',
-    'Conditional',
-    'Repeat',
-    'Operator',
-    'Structure',
-    'LineNr',
-    'NonText',
-    'SignColumn',
-    'CursorLine',
-    'CursorLineNr',
-    'StatusLine',
-    'StatusLineNC',
-    'EndOfBuffer',
-  },
-  extra_groups = {}, -- table: additional groups that should be cleared
-  exclude_groups = {}, -- table: groups you don't want to clear
-}
-
-vim.cmd.colorscheme 'tokyonight'
 -- You can configure highlights by doing something like:
 vim.cmd.hi 'Comment gui=none'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+require('lspconfig').lua_ls.setup {}
+require('lspconfig').texlab.setup {}
+require('lspconfig').phpactor.setup {}
+require('lspconfig').clangd.setup {}
+
+vim.diagnostic.config {
+  virtual_text = false,
+}
+
+vim.cmd 'set cc=100'
